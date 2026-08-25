@@ -1,16 +1,39 @@
-# React + Vite
+# E-Commerce Website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern e-commerce web application built with React, Vite, Tailwind CSS and Redux Toolkit.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Product listing
+- Product search and filtering
+- Product details
+- Cart
+- Wishlist
+- Checkout
+- Order management
+- Order tracking
+- Order cancellation
+- Payment status handling
+- Responsive UI
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React
+- Vite
+- Tailwind CSS
+- Redux Toolkit
+- React Router
+- Axios
+- React Hook Form
 
-## Expanding the ESLint configuration
+## Order Flow
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Processing → Shipped → Delivered
+
+Processing → Cancelled
+
+## Installation
+
+```bash
+npm install
+npm run dev
