@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { useProducts } from "../hooks/useProducts";
-import Loading from "./Loading";
+import { LoadingSpinner, ErrorState } from "../components";
 
 // Import Swiper React components
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
@@ -20,6 +20,14 @@ const Carsouel = () => {
     status,
   } = useProducts();
 
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return <ErrorState error={error} />;
+  }
+
   const swiperData = useMemo(() => {
     return [...products]
       .map((product) => ({
@@ -31,10 +39,6 @@ const Carsouel = () => {
         return b.score - a.score;
       });
   }, [products]);
-
-  if (isError) {
-    return <div>{error.message}</div>;
-  }
 
   return (
     <Swiper

@@ -3,12 +3,23 @@ import { Link, NavLink } from "react-router-dom";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { GrCart } from "react-icons/gr";
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
+import { Show, SignInButton, UserButton } from "@clerk/react";
 import { useCart } from "../hooks/useCart";
+import { FiHeart } from "react-icons/fi";
+
+import { useWishlist } from "../hooks/useWishlist";
+import { useUser } from "@clerk/react";
 
 const Navbar = () => {
   const cart = useCart();
+  const wishlist = useWishlist();
+  const { user } = useUser();
   const location = false;
+  console.log(cart);
+
+  const myCart = cart.items?.filter((item) => item.userId === user?.id) ?? [];
+  const myWishlist = wishlist?.filter((item) => item.userId === user?.id) ?? [];
+
   return (
     <div className="flex items-center justify-between py-2 md:py-3 bg-white">
       {/* logo */}
@@ -79,11 +90,22 @@ const Navbar = () => {
           </li>
 
           <li>
+            <Link to="/my-wishlist" className="relative">
+              <FiHeart />
+              {myWishlist.length > 0 && (
+                <span className="absolute -top-4 -right-1 h-3 w-3 bg-red-500 rounded-full text-white flex items-center justify-center text-xs p-2 ">
+                  {myWishlist.length}
+                </span>
+              )}
+            </Link>
+          </li>
+
+          <li>
             <Link to="/cart" className="relative">
               <GrCart />
-              {cart.items.length > 0 && (
+              {myCart.length > 0 && (
                 <span className="absolute -top-4 -right-1 h-3 w-3 bg-red-500 rounded-full text-white flex items-center justify-center text-xs p-2 ">
-                  {cart.items.length}
+                  {myCart.length}
                 </span>
               )}
             </Link>

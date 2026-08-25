@@ -1,6 +1,6 @@
 import React, { useEffect, useId, useMemo, useState } from "react";
 import { useProducts } from "../hooks/useProducts";
-import { ProductCard, Loading } from "../components";
+import { ProductCard, LoadingSpinner } from "../components";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const Shop = () => {
@@ -67,8 +67,28 @@ const Shop = () => {
     setCurrPage(1);
   }, [search, category, brand, range]);
 
-  if (isLoading) return <Loading />;
-  if (isError) return <div>{error.message}</div>;
+  if (isLoading) return <LoadingSpinner />;
+  if (isError) {
+    return (
+      <div>
+        <h2>Someting went wrong</h2>
+        {error.message}
+      </div>
+    );
+  }
+  if (currProducts.length === 0) {
+    return (
+      <div className="h-64 mt-12 text-center font-semibold ">
+        <p className="text-2xl">Product not fount </p>
+        <button
+          onClick={handleReset}
+          className="px-4 py-1 rounded-full mt-4 text-white bg-red-500 cursor-pointer"
+        >
+          reset filter
+        </button>
+      </div>
+    );
+  }
 
   const handleCategoryChange = (selectedCategory) => {
     setBrand("All");
@@ -98,20 +118,6 @@ const Shop = () => {
   const handleProductCard = (id) => {
     navigate(`/product/${id}`);
   };
-
-  if (currProducts.length === 0) {
-    return (
-      <div className="h-64 mt-12 text-center font-semibold ">
-        <p className="text-2xl">Product not fount </p>
-        <button
-          onClick={handleReset}
-          className="px-4 py-1 rounded-full mt-4 text-white bg-red-500 cursor-pointer"
-        >
-          reset filter
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="grid grid-cols-[260px_1fr] gap-5 pb-5">
@@ -164,6 +170,7 @@ const Shop = () => {
             value={range}
             type="range"
             max={5000}
+            min={1}
             className="accent-red-500 w-full"
           />
         </div>

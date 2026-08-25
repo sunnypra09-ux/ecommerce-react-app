@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { useSelector, useDispatch } from "react-redux";
 import { addOrder } from "../features/order/orderSlice";
+import { useUser } from "@clerk/react";
 
 import {
   selectTotalPrice,
@@ -21,6 +22,7 @@ const Checkout = () => {
   const cart = useCart();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { user } = useUser();
   const totalItems = useSelector(selectTotalItems);
   const totalPrice = Number(useSelector(selectTotalPrice).toFixed(2));
   const GST = Number((totalPrice * 0.18).toFixed(2));
@@ -28,6 +30,7 @@ const Checkout = () => {
   const onSubmit = (data) => {
     const order = {
       id: `ORD-${Date.now()}`,
+      userId: user.id,
       ...data,
       items: cart.items,
       subtotal: totalPrice,

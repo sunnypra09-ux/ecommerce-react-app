@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { updateOrderStatuses, cancelOrder } from "../features/order/orderSlice";
 
 import { useOrder } from "../hooks/useOrder";
 import { useNavigate } from "react-router-dom";
@@ -10,16 +11,16 @@ import { FaCircleXmark } from "react-icons/fa6";
 import { FaBoxOpen } from "react-icons/fa";
 
 import { useDispatch } from "react-redux";
-import { updateOrderStatuses, cancelOrder } from "../features/order/orderSlice";
+import { useUser } from "@clerk/react";
 
 const MyOrders = () => {
   const orders = useOrder();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { user } = useUser();
 
   const [filter, setFilter] = useState("All");
 
-  // Update order status every second
   useEffect(() => {
     dispatch(updateOrderStatuses());
 
@@ -30,16 +31,18 @@ const MyOrders = () => {
     return () => clearInterval(timer);
   }, [dispatch]);
 
+  const myOrders = orders.filter((order) => order.userId === user.id);
+
   // const
 
   // Filter orders
   const filteredOrders = useMemo(() => {
     if (filter === "All") {
-      return orders;
+      return myOrders;
     }
 
-    return orders.filter((order) => order.orderStatus === filter);
-  }, [orders, filter]);
+    return myOrders.filter((order) => order.orderStatus === filter);
+  }, [myOrders, filter]);
 
   // Format date
   const formatDate = (date) => {
@@ -94,9 +97,7 @@ const MyOrders = () => {
 
   const newOrder = [...filteredOrders];
   if (newOrder) {
-    newOrder.sort(
-      (a, b) => new Date(b.orderDate) - new Date(a.orderDate),
-    );
+    newOrder.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
   }
   // Status icon
 

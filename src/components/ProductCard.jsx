@@ -6,18 +6,42 @@ import { IoMdStarOutline } from "react-icons/io";
 import { IoMdHeart } from "react-icons/io";
 
 import { addToCart } from "../features/cart/cartSlice";
+import { toggleWishlist } from "../features/wishlist/wishlistSlice";
+import { useWishlist } from "../hooks/useWishlist";
 import { useDispatch } from "react-redux";
+import { useUser, SignIn } from "@clerk/react";
+import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ onClick, ...product }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isSignedIn, user } = useUser();
+  const wishlist = useWishlist();
 
   const rating = product.rating;
   const fullStar = Math.floor(rating);
   const halfStar = Math.ceil(rating - fullStar);
   const emptyStar = 5 - (fullStar + halfStar);
 
+  const isWishlist = wishlist?.some(
+    (item) => item.userId === user?.id && item.id === product.id,
+  );
+
   const handleAddToCart = (product) => {
-    dispatch(addToCart(product));
+    if (!isSignedIn) {
+      navigate("/sign-in");
+      return;
+    }
+    dispatch(addToCart({ ...product, userId: user.id }));
+  };
+
+  const handleWishlist = () => {
+    if (!isSignedIn) {
+      navigate("/sign-in");
+      return;
+    }
+
+    dispatch(toggleWishlist({ ...product, userId: user.id }));
   };
 
   return (
@@ -56,7 +80,10 @@ const ProductCard = ({ onClick, ...product }) => {
             ))}
           </div>
           <div className="flex flex-col gap-2 rounded bg-rose-200 p-2">
-            <span className="text-white cursor-pointer">
+            <span
+              onClick={handleWishlist}
+              className={`${isWishlist ? "text-rose-500" : "text-white"} cursor-pointer`}
+            >
               <IoMdHeart />
             </span>
             <span

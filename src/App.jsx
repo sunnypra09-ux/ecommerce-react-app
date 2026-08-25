@@ -9,6 +9,7 @@ import {
   Contact,
   Checkout,
   MyOrders,
+  Wishlist,
   OrderSuccess,
   OrderDetails,
   ProductDetails,
@@ -16,6 +17,7 @@ import {
 import { Navbar, ProtectedRoute } from "./components";
 import { Toaster } from "react-hot-toast";
 import { useCart } from "./hooks/useCart";
+import { SignIn } from "@clerk/react";
 
 const App = () => {
   const cart = useCart();
@@ -33,21 +35,22 @@ const App = () => {
         <Route path="/shop" element={<Shop />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/checkout" element={<Checkout />} />
         <Route path="/product/:id" element={<ProductDetails />} />
-        <Route path="/my-orders" element={<MyOrders />} />
-        <Route path="/order-details/:orderId" element={<OrderDetails />} />
-        <Route path="/order-success/:orderId" element={<OrderSuccess />} />
         <Route path="*" element={<Error />} />
-
         <Route
-          path="/cart"
-          element={
-            <ProtectedRoute>
-              <Cart />
-            </ProtectedRoute>
-          }
+          path="/sign-in"
+          element={<SignIn routing="path" path="/sign-in" />}
         />
+       
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/my-orders" element={<MyOrders />} />
+          <Route path="/my-wishlist" element={<Wishlist />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order-details/:orderId" element={<OrderDetails />} />
+          <Route path="/order-success/:orderId" element={<OrderSuccess />} />
+        </Route>
       </Routes>
     </div>
   );

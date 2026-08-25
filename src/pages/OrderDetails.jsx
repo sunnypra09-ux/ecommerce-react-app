@@ -12,13 +12,17 @@ import { MdLocationPin } from "react-icons/md";
 import { MdPayment } from "react-icons/md";
 import { useDispatch } from "react-redux";
 import { cancelOrder } from "../features/order/orderSlice";
+import { useUser } from "@clerk/react";
 
 const OrderDetails = () => {
   const { orderId } = useParams();
+  const { user } = useUser();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const orders = useOrder();
-  const order = orders?.find((order) => order.id === orderId);
+  const order = orders?.find(
+    (order) => order.id === orderId && order.userId === user.id,
+  );
 
   if (!order) {
     return (

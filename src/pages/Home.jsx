@@ -1,6 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Carsouel, CategoryCard, Loading } from "../components";
+import {
+  Carsouel,
+  CategoryCard,
+  LoadingSpinner,
+  ErrorState,
+} from "../components";
 import { useProducts } from "../hooks/useProducts";
 import { IoGridSharp } from "react-icons/io5";
 
@@ -27,8 +32,12 @@ const Home = () => {
   }, [products]);
 
   if (isLoading) {
-    return <Loading />;
+    return <LoadingSpinner />;
   }
+  if (isError) {
+    return <ErrorState error={error} />;
+  }
+  
   const sliceValue = categorySliceVar ? 7 : categories.length;
 
   const handleOnClick = (cat) => {

@@ -3,6 +3,7 @@ export { default as Contact } from "./Contact";
 export { default as Home } from "./Home";
 export { default as Shop } from "./Shop";
 export { default as About } from "./About";
+export { default as Wishlist } from "./Wishlist";
 export { default as Checkout } from "./Checkout";
 export { default as OrderSuccess } from "./OrderSuccess";
 export { default as OrderDetails } from "./OrderDetails";

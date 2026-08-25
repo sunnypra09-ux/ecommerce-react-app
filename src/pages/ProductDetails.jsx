@@ -1,11 +1,27 @@
-import React from 'react'
+import React from "react";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getProductById } from "../api/productAPI";
 
 const ProductDetails = () => {
-  return (
-    <div>
-      ProductDetails
-    </div>
-  )
-}
+  const { id } = useParams();
 
-export default ProductDetails
+  const {
+    data: Product,
+    isError,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["product", id],
+    queryFn: () => getProductById(id),
+  });
+
+  if(isLoading){
+    
+  }
+  
+
+  return <div>ProductDetails {id}</div>;
+};
+
+export default ProductDetails;

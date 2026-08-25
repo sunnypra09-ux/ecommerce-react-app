@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { CartItem, Summery } from "../components";
 import { useDispatch, useSelector } from "react-redux";
 import { selectTotalItems, selectTotalPrice } from "../features/cart/cartSlice";
+import { useUser } from "@clerk/react";
 
 import {
   removeFromCart,
@@ -16,15 +17,17 @@ export const Cart = () => {
   const cart = useCart();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { user } = useUser();
   const totalItems = useSelector(selectTotalItems);
   const totalPrice = useSelector(selectTotalPrice);
- 
+
+  const myCart = cart.items.filter((item) => item.userId === user.id);
 
   const GST = useMemo(() => {
     return totalPrice * 0.18;
   }, [totalPrice]);
 
-  if (cart.items.length === 0) {
+  if (myCart.length === 0) {
     return (
       <div className="w-full min-h-screen text-center pt-10 text-xl">
         <p>You cart is empty</p>
@@ -43,7 +46,7 @@ export const Cart = () => {
       <h1 className="text-2xl font-semibold pt-4">Shopping Cart</h1>
       <div className="grid md:grid-cols-[2fr_1fr] gap-2 h-auto">
         <div className="grid grid-cols-1 gap-2 h-fit">
-          {cart.items.map((item) => (
+          {myCart.map((item) => (
             <CartItem
               key={item.id}
               item={item}
@@ -53,7 +56,7 @@ export const Cart = () => {
             />
           ))}
         </div>
-        <div >
+        <div>
           <Summery
             navigate={() => navigate("/checkout")}
             totalItems={totalItems}
