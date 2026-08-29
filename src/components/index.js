@@ -11,3 +11,4 @@ export { default as ShippingDetails } from "./ShippingDetails";
 export { default as OrderSummary } from "./OrderSummary";
 export { default as PaymentMethod } from "./PaymentMethod";
 export { default as ProtectedRoute } from "./ProtectedRoute";
+export { default as EmptyState } from "./EmptyState";

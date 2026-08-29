@@ -1,4 +1,6 @@
+
 import { Badge } from "../components";
+
 import { GrCart } from "react-icons/gr";
 import { IoIosStar } from "react-icons/io";
 import { IoIosStarHalf } from "react-icons/io";
@@ -7,9 +9,13 @@ import { IoMdHeart } from "react-icons/io";
 
 import { addToCart } from "../features/cart/cartSlice";
 import { toggleWishlist } from "../features/wishlist/wishlistSlice";
+
 import { useWishlist } from "../hooks/useWishlist";
+
 import { useDispatch } from "react-redux";
+
 import { useUser, SignIn } from "@clerk/react";
+
 import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ onClick, ...product }) => {
@@ -32,6 +38,7 @@ const ProductCard = ({ onClick, ...product }) => {
       navigate("/sign-in");
       return;
     }
+
     dispatch(addToCart({ ...product, userId: user.id }));
   };
 
@@ -45,30 +52,36 @@ const ProductCard = ({ onClick, ...product }) => {
   };
 
   return (
-    <div className="w-full bg-amber-100 p-2 rounded ">
+    <div className="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-2 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+      {/* Product Image */}
       <div
         onClick={onClick}
-        className="relative h-40 bg-gray-200 flex items-center justify-center cursor-pointer"
+        className="relative flex h-44 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gray-100"
       >
         <img
           src={product.images?.[0]}
           alt={product.title}
-          className="w-full h-full object-contain"
+          className="h-full w-full object-contain p-3"
         />
 
-        <p className="absolute top-3 left-3">
+        <div className="absolute left-3 top-3">
           <Badge>{`${product.discountPercentage}% OFF`}</Badge>
-        </p>
+        </div>
       </div>
 
-      <div className=" pt-3">
-        <h2 className="line-clamp-1 font-semibold md:text-xl">
+      {/* Product Details */}
+      <div className="px-1 pt-3">
+        <h2 className="line-clamp-1 font-semibold text-gray-900 md:text-lg">
           {product.title}
         </h2>
 
-        <h3 className="font-semibold">₹{product.price}</h3>
-        <div className="flex justify-between items-center">
-          <div className="flex gap-1">
+        <h3 className="mt-1 font-semibold text-gray-900">
+          ₹{product.price}
+        </h3>
+
+        {/* Rating + Actions */}
+        <div className="mt-3 flex items-center justify-between">
+          <div className="flex items-center gap-0.5 text-yellow-500">
             {Array.from({ length: fullStar }).map((_, idx) => (
               <IoIosStar key={`full-${idx}`} />
             ))}
@@ -79,16 +92,22 @@ const ProductCard = ({ onClick, ...product }) => {
               <IoMdStarOutline key={`empty-${idx}`} />
             ))}
           </div>
-          <div className="flex flex-col gap-2 rounded bg-rose-200 p-2">
+
+          <div className="flex items-center gap-2 rounded-lg bg-gray-100 p-2">
             <span
               onClick={handleWishlist}
-              className={`${isWishlist ? "text-rose-500" : "text-white"} cursor-pointer`}
+              className={`cursor-pointer text-lg transition ${
+                isWishlist
+                  ? "text-rose-500"
+                  : "text-gray-500 hover:text-rose-500"
+              }`}
             >
               <IoMdHeart />
             </span>
+
             <span
               onClick={() => handleAddToCart(product)}
-              className="cursor-pointer"
+              className="cursor-pointer text-lg text-gray-700 transition hover:text-black"
             >
               <GrCart />
             </span>

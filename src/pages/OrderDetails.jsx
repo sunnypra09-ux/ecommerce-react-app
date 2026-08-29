@@ -1,37 +1,49 @@
-import React, { use } from "react";
-import { MdOutlineKeyboardBackspace } from "react-icons/md";
+import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useOrder } from "../hooks/useOrder";
-import { FaRegCheckCircle } from "react-icons/fa";
-import { TbXboxX } from "react-icons/tb";
-import { LiaShippingFastSolid } from "react-icons/lia";
-import { FaBoxOpen } from "react-icons/fa";
-import { FaCircleCheck } from "react-icons/fa6";
-import { FaCircleXmark } from "react-icons/fa6";
-import { MdLocationPin } from "react-icons/md";
-import { MdPayment } from "react-icons/md";
 import { useDispatch } from "react-redux";
-import { cancelOrder } from "../features/order/orderSlice";
 import { useUser } from "@clerk/react";
+
+import { useOrder } from "../hooks/useOrder";
+import { cancelOrder } from "../features/order/orderSlice";
+
+import { FaArrowLeft } from "react-icons/fa";
+import { FaCircleCheck } from "react-icons/fa6";
+import { FaBoxOpen } from "react-icons/fa";
+import { TbTruckDelivery } from "react-icons/tb";
+import { FaCircleXmark } from "react-icons/fa6";
 
 const OrderDetails = () => {
   const { orderId } = useParams();
-  const { user } = useUser();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const orders = useOrder();
+  const { user } = useUser();
+
+  // Find current user's order
   const order = orders?.find(
-    (order) => order.id === orderId && order.userId === user.id,
+    (item) => item.id === orderId && item.userId === user?.id,
   );
 
+  // Order not found
   if (!order) {
     return (
-      <div className="p-8 text-center">
-        <h2 className="text-xl font-semibold">Order not found</h2>
+      <div className="flex min-h-[400px] flex-col items-center justify-center text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+          <FaBoxOpen className="text-2xl text-gray-400" />
+        </div>
+
+        <h2 className="mt-4 text-xl font-bold text-gray-900">
+          Order not found
+        </h2>
+
+        <p className="mt-2 text-sm text-gray-500">
+          We couldn't find this order.
+        </p>
 
         <button
           onClick={() => navigate("/my-orders")}
-          className="mt-4 rounded border px-4 py-2"
+          className="mt-5 rounded-lg bg-red-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-red-600"
         >
           Back to My Orders
         </button>
@@ -39,272 +51,372 @@ const OrderDetails = () => {
     );
   }
 
-  const isProcessing = order.orderStatus === "Processing";
   const isCancelled = order.orderStatus === "Cancelled";
+  const isShipped =
+    order.orderStatus === "Shipped" ||
+    order.orderStatus === "Delivered";
   const isDelivered = order.orderStatus === "Delivered";
-  const isShipped = order.orderStatus === "Shipped";
 
-  console.log(orders);
+  const handleCancel = () => {
+    dispatch(
+      cancelOrder({
+        orderId: order.id,
+      }),
+    );
+  };
 
-  const formateDate = (date) => {
-    return new Date(date).toLocaleDateString("en-IN", {
+  const formatDate = (date) => {
+    if (!date) return "N/A";
+
+    return new Date(date).toLocaleString("en-IN", {
       day: "2-digit",
       month: "short",
       year: "numeric",
-      hour12: true,
-      minute: "2-digit",
       hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
-  const getStyle = (status) => {
-    switch (status) {
-      case "Cancelled":
-        return "text-red-500";
-      case "Delivered":
-        return "text-green-500";
-      case "Shipped":
-        return "text-orange-500";
-      default:
-        return "text-yellow-500";
-    }
-  };
-
-  const getIcon = (status) => {
-    switch (status) {
-      case "Cancelled":
-        return <TbXboxX />;
-      case "Delivered":
-        return <FaRegCheckCircle />;
-      case "Shipped":
-        return <LiaShippingFastSolid />;
-      default:
-        return <FaBoxOpen />;
-    }
-  };
-
   return (
-    <div>
-      <div className="grid grid-cols-[2fr_1fr] gap-4 my-4">
-        <div className="p-2 bg-white rounded">
-          <span
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-sm font-semibold cursor-pointer text-blue-500"
-          >
-            <MdOutlineKeyboardBackspace />
-            Back to My Orders
-          </span>
+    <main className="pb-8">
+      {/* Header */}
+      <div className="mb-6 flex items-center gap-3">
+        <button
+          onClick={() => navigate("/my-orders")}
+          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
+        >
+          <FaArrowLeft className="text-sm" />
+        </button>
 
-          <h1 className="text-xl font-semibold mt-2">Orer Details</h1>
-          <p className="font-semibold">Order ID : {orderId}</p>
-          <p className="text-xs text-gray-600">
-            Placed on {formateDate(order.orderDate)}
-          </p>
-        </div>
-
-        <div className="bg-white rounded border-2 border-gray-200 p-2">
-          <span className="text-sm text-gray-600">Order Status</span>
-          <h1
-            className={`font-semibold text-xl flex items-center gap-2 w-fit ${getStyle(order.orderStatus)}`}
-          >
-            {order.orderStatus}
-            {getIcon(order.orderStatus)}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Order Details
           </h1>
 
-          {isCancelled && (
-            <div className="mt-2">
-              <p className="text-sm text-gray-600">Cancelled On</p>
-              <span className="font-semibold">{order.cancelDate}</span>
-            </div>
-          )}
-
-          {/* {timeline} */}
-          {!isCancelled && (
-            <div className="flex items-center justify-center rounded mt-4">
-              <div className="flex flex-col items-center justify-center gap-1">
-                <FaCircleCheck className="text-2xl text-green-500" />
-                <p className="text-sm font-semibold">Processing</p>
-              </div>
-              <div
-                className={`h-1 w-15 ${isShipped || isDelivered ? "bg-green-500" : "bg-gray-200"}`}
-              ></div>
-
-              <div className="flex flex-col items-center justify-center gap-1">
-                {isShipped || isDelivered ? (
-                  <FaCircleCheck className="text-2xl text-green-500" />
-                ) : (
-                  <FaCircleXmark className="text-2xl text-red-500" />
-                )}
-                <p
-                  className={`text-sm font-semibold ${isShipped ? "" : "text-gray-600"}`}
-                >
-                  Shipped
-                </p>
-              </div>
-              <div
-                className={`h-1 w-15 ${isDelivered ? "bg-green-500" : "bg-gray-200"}`}
-              ></div>
-
-              <div className="flex flex-col items-center justify-center gap-1">
-                {isDelivered ? (
-                  <FaCircleCheck className="text-2xl text-green-500" />
-                ) : (
-                  <FaCircleXmark className="text-2xl text-red-500" />
-                )}
-                <p
-                  className={`text-sm font-semibold ${isDelivered ? "" : "text-gray-600"}`}
-                >
-                  Delivered
-                </p>
-              </div>
-            </div>
-          )}
-
-          {isProcessing && (
-            <button
-              onClick={() => dispatch(cancelOrder({ orderId: order.id }))}
-              className="border-2 border-red-400 text-red-500 mt-5 px-4 py-1 rounded cursor-pointer font-semibold "
-            >
-              Cancel Order
-            </button>
-          )}
+          <p className="text-sm text-gray-500">
+            Order ID: {order.id}
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-[2fr_1fr] gap-4 mb-4">
-        <div className="bg-white rounded border-2 border-gray-200 p-2">
-          <span className="text-sm font-semibold">
-            Items ({order.items.length})
-          </span>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        {/* Left Section */}
+        <div className="space-y-5 lg:col-span-2">
+          {/* Order Status */}
+          <section className="rounded-xl border border-gray-200 bg-white p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                  Order Status
+                </p>
 
-          <div className="grid grid-cols-1 gap-4 border-gray-200 px-4 my-4">
-            {order.items.map((orderItem) => (
+                <div className="mt-2 flex items-center gap-2">
+                  {order.orderStatus === "Processing" && (
+                    <FaBoxOpen className="text-yellow-500" />
+                  )}
+
+                  {order.orderStatus === "Shipped" && (
+                    <TbTruckDelivery className="text-orange-500" />
+                  )}
+
+                  {order.orderStatus === "Delivered" && (
+                    <FaCircleCheck className="text-green-500" />
+                  )}
+
+                  {order.orderStatus === "Cancelled" && (
+                    <FaCircleXmark className="text-red-500" />
+                  )}
+
+                  <h2 className="text-lg font-bold text-gray-900">
+                    {order.orderStatus}
+                  </h2>
+                </div>
+              </div>
+
               <div
-                key={orderItem.id}
-                className="grid grid-cols-[60px_1fr_60px] items-start gap-3"
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  isCancelled
+                    ? "bg-red-50 text-red-500"
+                    : isDelivered
+                      ? "bg-green-50 text-green-600"
+                      : isShipped
+                        ? "bg-orange-50 text-orange-500"
+                        : "bg-yellow-50 text-yellow-600"
+                }`}
               >
-                {/* Image */}
-                <div className="h-15 overflow-hidden rounded bg-gray-100">
-                  <img
-                    src={orderItem.images?.[0]}
-                    alt={orderItem.title}
-                    className="h-full w-full object-contain"
+                {order.orderStatus}
+              </div>
+            </div>
+
+            {/* Timeline */}
+            {!isCancelled && (
+              <div className="mt-8">
+                <div className="flex items-start">
+                  {/* Ordered */}
+                  <TimelineStep
+                    label="Ordered"
+                    active
+                  />
+
+                  <TimelineLine active={isShipped} />
+
+                  {/* Shipped */}
+                  <TimelineStep
+                    label="Shipped"
+                    active={isShipped}
+                  />
+
+                  <TimelineLine active={isDelivered} />
+
+                  {/* Delivered */}
+                  <TimelineStep
+                    label="Delivered"
+                    active={isDelivered}
                   />
                 </div>
-
-                {/* Product */}
-                <div>
-                  <span className="font-semibold">
-                    {orderItem.title.length > 25
-                      ? `${orderItem.title.slice(0, 20)}...`
-                      : orderItem.title}
-                  </span>
-
-                  <p className="text-sm text-gray-600">
-                    Qty: {orderItem.quantity}
-                  </p>
-                </div>
-
-                {/* Price */}
-                <div className="font-semibold">
-                  ₹{orderItem.price * orderItem.quantity}
-                </div>
               </div>
-            ))}
+            )}
 
-            {order.items.length > 3 && <span>View All Items </span>}
-          </div>
-        </div>
+            {isCancelled && (
+              <div className="mt-5 rounded-lg bg-red-50 p-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-red-400">
+                  Cancelled On
+                </p>
 
-        <div className="grid grid-col-1 gap-2">
-          <div className="rounded border-2 bg-white border-gray-200 p-2">
-            <span className="font-semibold flex items-center gap-2">
-              <MdLocationPin /> Shipping Address
-            </span>
-            <div className="text-gray-600 flex flex-col gap-1">
-              <p className="text-semibold text-black mt-2">{order.fullName}</p>
-              <p>{order.addressLine1}</p>
-              <p>{order.pinCode} , India</p>
-              <p>+91 {order.phoneNumber}</p>
-            </div>
-          </div>
-          <div className="rounded border-2 bg-white border-gray-200 p-2">
-            <span className="font-semibold flex items-center gap-2">
-              <MdPayment /> Shipping Address
-            </span>
+                <p className="mt-1 text-sm font-semibold text-red-600">
+                  {order.cancelDate || "N/A"}
+                </p>
+              </div>
+            )}
+          </section>
 
-            <div className="mt-2">
-              <div className="flex items-center justify-between">
-                <span>Payment Status</span>
-                <span
-                  className={`${order.paymentStatus === ("Pending" || "Not Paid") ? "text-orange-400" : "text-green-500"}`}
+          {/* Items */}
+          <section className="rounded-xl border border-gray-200 bg-white p-5">
+            <h2 className="mb-4 text-lg font-bold text-gray-900">
+              Ordered Items
+            </h2>
+
+            <div className="space-y-3">
+              {order.items?.map((item) => (
+                <div
+                  key={item.id}
+                  className="grid grid-cols-[70px_1fr_auto] items-center gap-4 rounded-lg bg-gray-50 p-3"
                 >
-                  {order.paymentStatus}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Payment Method</span>
-                <span className="uppercase">{order.paymentMethod}</span>
-              </div>
-
-              {order.orderStatus !== "Cancelled" &&
-                order.paymentMethod !== "COD" && (
-                  <div className="flex items-center justify-between">
-                    <span>Paid on</span>
-                    <span>{formateDate(order.orderDate)}</span>
+                  <div className="h-[70px] w-[70px] overflow-hidden rounded-lg bg-white">
+                    <img
+                      src={item.images?.[0]}
+                      alt={item.title}
+                      className="h-full w-full object-contain p-1"
+                    />
                   </div>
-                )}
 
-              {order.orderStatus === "Cancelled" &&
-                order.paymentMethod !== "COD" && (
-                  <div className="flex items-center justify-between">
-                    <span>Refund on</span>
-                    <span>{formateDate(order.cancelDate)}</span>
+                  <div className="min-w-0">
+                    <h3 className="line-clamp-2 text-sm font-semibold text-gray-900">
+                      {item.title}
+                    </h3>
+
+                    <p className="mt-1 text-sm text-gray-500">
+                      Quantity: {item.quantity}
+                    </p>
                   </div>
-                )}
+
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-900">
+                      ₹{item.price * item.quantity}
+                    </p>
+
+                    <p className="text-xs text-gray-500">
+                      ₹{item.price} each
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          </section>
+
+          {/* Shipping Address */}
+          <section className="rounded-xl border border-gray-200 bg-white p-5">
+            <h2 className="mb-4 text-lg font-bold text-gray-900">
+              Shipping Address
+            </h2>
+
+            <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+              <Info label="Name" value={order.shipping?.name} />
+              <Info label="Phone" value={order.shipping?.phone} />
+              <Info label="Address" value={order.shipping?.address} />
+              <Info label="City" value={order.shipping?.city} />
+              <Info label="State" value={order.shipping?.state} />
+              <Info label="Pincode" value={order.shipping?.pincode} />
+            </div>
+          </section>
         </div>
+
+        {/* Right Section */}
+        <aside className="h-fit space-y-5">
+          {/* Order Summary */}
+          <section className="rounded-xl border border-gray-200 bg-white p-5">
+            <h2 className="mb-4 text-lg font-bold text-gray-900">
+              Order Summary
+            </h2>
+
+            <div className="space-y-3 text-sm">
+              <SummaryRow
+                label={`Subtotal (${order.totalItems})`}
+                value={`₹${Number(order.subtotal).toFixed(2)}`}
+              />
+
+              <SummaryRow
+                label="Shipping"
+                value="Free"
+              />
+
+              <SummaryRow
+                label="GST"
+                value={`₹${Number(
+                  order.total - order.subtotal,
+                ).toFixed(2)}`}
+              />
+
+              <div className="border-t border-gray-200 pt-3">
+                <SummaryRow
+                  label="Total"
+                  value={`₹${Number(order.total).toFixed(2)}`}
+                  bold
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Payment */}
+          <section className="rounded-xl border border-gray-200 bg-white p-5">
+            <h2 className="mb-4 text-lg font-bold text-gray-900">
+              Payment
+            </h2>
+
+            <div className="space-y-3">
+              <SummaryRow
+                label="Method"
+                value={
+                  order.paymentMethod === "cod"
+                    ? "Cash on Delivery"
+                    : order.paymentMethod
+                }
+              />
+
+              <SummaryRow
+                label="Status"
+                value={order.paymentStatus}
+              />
+            </div>
+          </section>
+
+          {/* Order Date */}
+          <section className="rounded-xl border border-gray-200 bg-white p-5">
+            <Info
+              label="Order Placed"
+              value={formatDate(order.orderDate)}
+            />
+          </section>
+
+          {/* Actions */}
+          <div className="flex flex-col gap-2">
+            {!isCancelled &&
+              order.orderStatus === "Processing" && (
+                <button
+                  onClick={handleCancel}
+                  className="w-full cursor-pointer rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-500 transition hover:bg-red-100"
+                >
+                  Cancel Order
+                </button>
+              )}
+
+            <button
+              onClick={() => navigate("/my-orders")}
+              className="w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+            >
+              Back to My Orders
+            </button>
+          </div>
+        </aside>
+      </div>
+    </main>
+  );
+};
+
+/* ----------------------------------
+   Timeline
+---------------------------------- */
+
+const TimelineStep = ({ label, active }) => {
+  return (
+    <div className="flex min-w-fit flex-col items-center">
+      <div
+        className={`flex h-8 w-8 items-center justify-center rounded-full ${
+          active
+            ? "bg-green-500 text-white"
+            : "border-2 border-gray-200 bg-white text-gray-300"
+        }`}
+      >
+        {active && <FaCircleCheck />}
       </div>
 
-      <div className="grid grid-cols-[2fr_1fr] gap-4 mb-4">
-        <div className="rounded border-2 border-gray-200 p-2 bg-white">
-          <span className="font-semibold text-xl">Order Summery</span>
+      <span
+        className={`mt-2 text-xs font-medium ${
+          active ? "text-gray-700" : "text-gray-400"
+        }`}
+      >
+        {label}
+      </span>
+    </div>
+  );
+};
 
-          <div className="text-gray-600 pb-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <span>{`Subtotal (${order.items.length} Items)`}</span>
-              <span>₹{order.subtotal}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Shipping Charge</span>
-              <span className="font-semibold text-green-500">Free</span>
-            </div>
+const TimelineLine = ({ active }) => {
+  return (
+    <div
+      className={`mt-4 h-0.5 flex-1 ${
+        active ? "bg-green-500" : "bg-gray-200"
+      }`}
+    />
+  );
+};
 
-            <div className="flex items-center justify-between">
-              <span>GST (18%)</span>
-              <span>₹{order.gst}</span>
-            </div>
-          </div>
+/* ----------------------------------
+   Info
+---------------------------------- */
 
-          <div className="flex items-center justify-between">
-            <span className="text-xl font-semibold">Total</span>
-            <span>₹{order.total}</span>
-          </div>
-        </div>
-        <div className="rounded border-2 border-gray-200 p-2 bg-white">
-          <span className="font-semibold text-xl">Need Help ?</span>
-          <p className="text-gray-600 text-sm ">
-            You can return or replace your items with in 7 days of delivery
-          </p>
+const Info = ({ label, value }) => {
+  return (
+    <div>
+      <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+        {label}
+      </p>
 
-          <button className="px-4 py-1 rounded cursor-pointer mt-5 border-2 border-blue-400 text-sm font-semibold text-blue-500">
-            Request Retuen / Replace
-          </button>
-        </div>
-      </div>
+      <p className="mt-1 text-sm font-medium text-gray-700">
+        {value || "N/A"}
+      </p>
+    </div>
+  );
+};
+
+/* ----------------------------------
+   Summary Row
+---------------------------------- */
+
+const SummaryRow = ({ label, value, bold = false }) => {
+  return (
+    <div
+      className={`flex items-center justify-between ${
+        bold ? "text-base font-bold" : "font-medium"
+      }`}
+    >
+      <span className="text-gray-600">{label}</span>
+
+      <span className="text-gray-900">{value}</span>
     </div>
   );
 };
 
 export default OrderDetails;
+

@@ -1,224 +1,341 @@
 import React from "react";
-import { FaCheckCircle } from "react-icons/fa";
-import { FaClipboardList } from "react-icons/fa";
+import { FaCheckCircle, FaClipboardList } from "react-icons/fa";
 import { FaRegUser } from "react-icons/fa";
-import { MdOutlineDateRange } from "react-icons/md";
+import { MdOutlineDateRange, MdPayment } from "react-icons/md";
 import { FiBox } from "react-icons/fi";
-import { GrLocation } from "react-icons/gr";
+import { GrLocation, GrCart } from "react-icons/gr";
 import { MdOutlineShoppingBag } from "react-icons/md";
-import { LuShieldCheck } from "react-icons/lu";
-import { MdPayment } from "react-icons/md";
-import { LuShieldX } from "react-icons/lu";
-import { IoCartOutline } from "react-icons/io5";
+import { LuShieldCheck, LuShieldX } from "react-icons/lu";
 import { IoIosListBox } from "react-icons/io";
 
-import { useNavigate, useParams } from "react-router-dom";
-import { useOrder } from "../hooks/useOrder";
-
-const OrderSucess = () => {
+const OrderSuccess = () => {
   const navigate = useNavigate();
   const orders = useOrder();
   const { orderId } = useParams();
-  console.log(orders);
 
   const latestOrder = orders?.find((order) => order.id === orderId);
-  console.log(latestOrder);
-  const formattedDate = new Date(latestOrder?.orderDate).toLocaleString("en-IN");
+
+  // Safe empty state
+  if (!latestOrder) {
+    return (
+      <div className="flex min-h-[500px] flex-col items-center justify-center text-center">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
+          <FaClipboardList className="text-3xl text-gray-400" />
+        </div>
+
+        <h1 className="mt-5 text-2xl font-bold text-gray-900">
+          Order Not Found
+        </h1>
+
+        <p className="mt-2 text-sm text-gray-500">
+          We couldn't find the order you're looking for.
+        </p>
+
+        <button
+          onClick={() => navigate("/my-orders")}
+          className="mt-5 rounded-lg bg-green-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-600"
+        >
+          View My Orders
+        </button>
+      </div>
+    );
+  }
+
+  const formattedDate = new Date(latestOrder.orderDate).toLocaleString(
+    "en-IN",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    },
+  );
+
+  const isPaymentPending =
+    latestOrder.paymentStatus === "Pending" ||
+    latestOrder.paymentStatus === "Not Paid";
 
   return (
-    <div>
-      <header>
-        <div className="flex flex-col items-center gap-3">
-          <FaCheckCircle className="text-green-500 text-7xl " />
-          <h1 className="text-2xl font-bold">Order Placed Successfully!</h1>
-          <p className="text-center">
-            Thank you for shopping with us. <br /> Your order has been placed
-            and will be delivered soon.
-          </p>
-          <div className="bg-white rounded py-2  px-5 shadow-xl flex items-center gap-2">
-            <span className="bg-green-100 text-green-500 rounded-full p-2 text-xl">
-              <FaClipboardList />
+    <main className="pb-8">
+      {/* Success Header */}
+      <header className="flex flex-col items-center gap-3 py-6 text-center">
+        <FaCheckCircle className="text-7xl text-green-500" />
+
+        <h1 className="text-2xl font-bold text-gray-900">
+          Order Placed Successfully!
+        </h1>
+
+        <p className="max-w-md text-sm leading-6 text-gray-500">
+          Thank you for shopping with us.
+          <br />
+          Your order has been placed and will be delivered soon.
+        </p>
+
+        {/* Order ID */}
+        <div className="mt-2 flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-5 py-3 shadow-sm">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-lg text-green-500">
+            <FaClipboardList />
+          </span>
+
+          <div className="text-left">
+            <p className="text-xs text-gray-500">Order ID</p>
+
+            <span className="text-sm font-bold text-green-500">
+              {latestOrder.id}
             </span>
-            <div>
-              <p className="text-sm text-gray-600"> Order ID</p>
-              <span className="text-green-500 font-semibold">
-                {latestOrder.id}
-              </span>
-            </div>
           </div>
         </div>
       </header>
 
-      <main className="rounded inset-shadow-sm bg-white p-2 my-4">
-        <div className="flex items-center gap-2 border-b border-gray-200 py-2">
-          <FaRegUser />
-          <span className="font-semibold">Order details</span>
+      {/* Main Card */}
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        {/* Section Header */}
+        <div className="flex items-center gap-2 border-b border-gray-200 pb-4">
+          <FaRegUser className="text-gray-600" />
+
+          <h2 className="font-semibold text-gray-900">Order Details</h2>
         </div>
 
-        <div className="grid  sm:grid-cols-2 md:grid-cols-4 gap-2">
-          <div className="bg-white rounded p-2 shadow flex items-center gap-2">
-            <span className="bg-green-100 text-green-500 rounded-full p-2 text-xl">
-              <MdOutlineDateRange />
-            </span>
-            <div>
-              <p>Order Date</p>
-              <span className="font-semibold">{formattedDate}</span>
-            </div>
-          </div>
+        {/* Order Information */}
+        <div className="grid grid-cols-1 gap-3 py-5 sm:grid-cols-2 md:grid-cols-4">
+          <InfoCard
+            icon={<MdOutlineDateRange />}
+            label="Order Date"
+            value={formattedDate}
+          />
 
-          <div className="bg-white rounded p-2 shadow flex items-center gap-2">
-            <span className="bg-green-100 text-green-500 rounded-full p-2 text-xl">
-              <MdPayment />
-            </span>
-            <div>
-              <p>Payment Meathod</p>
-              <span className="font-semibold">{latestOrder.paymentMethod}</span>
-            </div>
-          </div>
+          <InfoCard
+            icon={<MdPayment />}
+            label="Payment Method"
+            value={latestOrder.paymentMethod}
+          />
 
-          <div className="bg-white rounded p-2 shadow flex items-center gap-2">
-            <span
-              className={`${latestOrder.paymentStatus === "Pending" ? "bg-orange-100 text-orange-500" : "bg-green-100 text-green-500"} rounded-full p-2`}
-            >
-              {latestOrder.paymentStatus === "Pending" ? (
-                <LuShieldX />
-              ) : (
-                <LuShieldCheck />
-              )}
-            </span>
+          <InfoCard
+            icon={isPaymentPending ? <LuShieldX /> : <LuShieldCheck />}
+            label="Payment Status"
+            value={latestOrder.paymentStatus}
+            valueClass={isPaymentPending ? "text-orange-500" : "text-green-500"}
+            iconClass={
+              isPaymentPending
+                ? "bg-orange-50 text-orange-500"
+                : "bg-green-50 text-green-500"
+            }
+          />
 
-            <div>
-              <p>Payment Status</p>
-              <span
-                className={`${latestOrder.paymentStatus === "Pending" ? "text-orange-500" : "text-green-500"} font-semibold`}
-              >
-                {latestOrder.paymentStatus}
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded p-2 shadow flex items-center gap-2">
-            <span className="bg-green-100 text-green-500 rounded-full p-2 text-xl">
-              <FiBox />
-            </span>
-            <div>
-              <p>Order Status</p>
-              <span className="font-semibold">{latestOrder.orderStatus}</span>
-            </div>
-          </div>
+          <InfoCard
+            icon={<FiBox />}
+            label="Order Status"
+            value={latestOrder.orderStatus}
+          />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2  border-y border-gray-200 my-4 py-2">
+        {/* Address + Summary */}
+        <div className="grid grid-cols-1 gap-6 border-y border-gray-200 py-5 md:grid-cols-2">
+          {/* Shipping Address */}
           <div>
-            <div className="flex items-center gap-2 py-2">
-              <span>
-                <GrLocation />
-              </span>
-              <span className="font-semibold ">Shipping Address</span>
-            </div>
-            <div className="px-6">
-              <div>
-                <p className="font-semibold">{latestOrder.fullName}</p>
-                <p>{latestOrder.phoneNumber}</p>
-                <p>{latestOrder.email}</p>
-                <p className="mt-2">{latestOrder.addressLine1}</p>
-                <p>{`${latestOrder.city},${latestOrder.state} - ${latestOrder.pinCode}`}</p>
-                <p>India</p>
-              </div>
+            <SectionTitle icon={<GrLocation />} title="Shipping Address" />
+
+            <div className="space-y-1 px-1 pt-3 text-sm text-gray-600">
+              <p className="font-semibold text-gray-900">
+                {latestOrder.fullName}
+              </p>
+
+              <p>{latestOrder.phoneNumber}</p>
+
+              <p>{latestOrder.email}</p>
+
+              <p className="pt-2">{latestOrder.addressLine1}</p>
+
+              <p>
+                {latestOrder.city}, {latestOrder.state} - {latestOrder.pinCode}
+              </p>
+
+              <p>India</p>
             </div>
           </div>
 
-          <div className="rounded bg-white">
-            <div className="flex items-center gap-2 border-b border-gray-200 py-2">
-              <span>
-                <MdOutlineShoppingBag />
-              </span>
-              <span className="font-semibold ">Order Summary</span>
-            </div>
+          {/* Order Summary */}
+          <div>
+            <SectionTitle
+              icon={<MdOutlineShoppingBag />}
+              title="Order Summary"
+            />
 
-            <div className="border-y border-gray-200 px-2 py-4 flex flex-col gap-2">
-              <div className="flex items-center justify-between ">
-                <span>{`Subtotal (${latestOrder.totalItems} items)`}</span>
-                <span className="font-semibold text-black">
-                  ₹{latestOrder.subtotal}
-                </span>
-              </div>
-              <div className="flex items-center justify-between ">
-                <span>Shipping Charge</span>
-                <span className="font-semibold text-green-500">₹0</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>GST (18%)</span>
-                <span className="font-semibold text-black">
-                  ₹{latestOrder.gst}
-                </span>
-              </div>
-            </div>
+            <div className="mt-3 space-y-3 rounded-lg bg-gray-50 p-4">
+              <SummaryRow
+                label={`Subtotal (${latestOrder.totalItems} items)`}
+                value={`₹${latestOrder.subtotal}`}
+              />
 
-            <div className="py-4 px-2 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-xl">Total Amount</h3>
-                <span className="font-bold text-xl">₹{latestOrder.total}</span>
+              <SummaryRow
+                label="Shipping Charge"
+                value="₹0"
+                valueClass="text-green-500"
+              />
+
+              <SummaryRow label="GST (18%)" value={`₹${latestOrder.gst}`} />
+
+              <div className="border-t border-gray-200 pt-3">
+                <SummaryRow
+                  label="Total Amount"
+                  value={`₹${latestOrder.total}`}
+                  bold
+                />
               </div>
             </div>
           </div>
         </div>
 
-        <div>
-          <div className="flex items-center gap-2">
-            <span>
-              <MdOutlineShoppingBag />
-            </span>
-            <span className="font-semibold">{`Ordered Items(${latestOrder.totalItems})`}</span>
-          </div>
-          <div className="flex flex-col gap-2 my-4">
-            {latestOrder.items.map((cartItem) => {
-              return (
-                <div
-                  key={cartItem.id}
-                  className="grid grid-cols-[1fr_3fr_1fr] md:grid-cols-[120px_1fr_120px]  gap-2"
-                >
-                  <div className="bg-gray-200 rounded">
-                    <img src={cartItem.images[0]} alt={cartItem.title} />
-                  </div>
-                  <div className="">
-                    <span className="font-semibold  md:text-xl">
-                      {cartItem.title.length > 30
-                        ? `${cartItem.title.slice(0, 28)}...`
-                        : cartItem.title}
-                    </span>
-                    <p className="text-gray-600 md:text-sm">{`Qty : ${cartItem.quantity}`}</p>
-                  </div>
-                  <div className="font-semibold text-[1rem] ">
-                    ₹{cartItem.price * cartItem.quantity}
-                  </div>
+        {/* Ordered Items */}
+        <div className="pt-5">
+          <SectionTitle
+            icon={<MdOutlineShoppingBag />}
+            title={`Ordered Items (${latestOrder.totalItems})`}
+          />
+
+          <div className="mt-4 space-y-3">
+            {latestOrder.items?.map((cartItem) => (
+              <div
+                key={cartItem.id}
+                className="grid grid-cols-[64px_1fr_auto] items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-2 sm:grid-cols-[80px_1fr_auto]"
+              >
+                {/* Image */}
+                <div className="h-16 w-16 overflow-hidden rounded-lg bg-white sm:h-20 sm:w-20">
+                  <img
+                    src={cartItem.images?.[0]}
+                    alt={cartItem.title}
+                    className="h-full w-full object-contain p-1"
+                  />
                 </div>
-              );
-            })}
+
+                {/* Product */}
+                <div className="min-w-0">
+                  <h3 className="line-clamp-2 text-sm font-semibold text-gray-900 sm:text-base">
+                    {cartItem.title}
+                  </h3>
+
+                  <p className="mt-1 text-xs text-gray-500">
+                    Qty: {cartItem.quantity}
+                  </p>
+                </div>
+
+                {/* Price */}
+                <div className="text-right">
+                  <p className="text-sm font-bold text-gray-900">
+                    ₹{cartItem.price * cartItem.quantity}
+                  </p>
+
+                  <p className="text-xs text-gray-500">
+                    ₹{cartItem.price} each
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </main>
+      </section>
 
-      <div className="flex flex-col gap-4 items-center py-4">
-        <p>We have send the order details to your email</p>
-        <div className="flex items-center flex-wrap gap-5">
+      {/* Footer Actions */}
+      <footer className="flex flex-col items-center gap-4 py-6 text-center">
+        <p className="text-sm text-gray-500">
+          We have sent the order details to your email.
+        </p>
+
+        <div className="flex flex-wrap justify-center gap-3">
           <button
             onClick={() => navigate("/shop")}
-            className="rounded px-4 py-1 font-semibold flex items-center justify-center gap-2 cursor-pointer text-green-500 box-border border-2 border-green-500 "
+            className="flex items-center gap-2 rounded-lg border border-green-500 px-5 py-2.5 text-sm font-semibold text-green-500 transition hover:bg-green-50"
           >
-            <IoCartOutline /> <span>Continue Shopping</span>
+            <IoCartOutline />
+            Continue Shopping
           </button>
+
           <button
             onClick={() => navigate("/my-orders")}
-            className="rounded px-4 py-1 font-semibold flex items-center justify-center gap-2 cursor-pointer text-white bg-green-500"
+            className="flex items-center gap-2 rounded-lg bg-green-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-600"
           >
             <IoIosListBox />
-            <span>View My Order</span>
+            View My Orders
           </button>
         </div>
+      </footer>
+    </main>
+  );
+};
+
+/* ----------------------------------
+   Info Card
+---------------------------------- */
+
+const InfoCard = ({
+  icon,
+  label,
+  value,
+  iconClass = "bg-green-50 text-green-500",
+  valueClass = "text-gray-900",
+}) => {
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
+      <span
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl ${iconClass}`}
+      >
+        {icon}
+      </span>
+
+      <div className="min-w-0">
+        <p className="text-xs text-gray-500">{label}</p>
+
+        <p className={`truncate text-sm font-semibold ${valueClass}`}>
+          {value}
+        </p>
       </div>
     </div>
   );
 };
 
-export default OrderSucess;
+/* ----------------------------------
+   Section Title
+---------------------------------- */
+
+const SectionTitle = ({ icon, title }) => {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-gray-600">{icon}</span>
+
+      <h2 className="font-semibold text-gray-900">{title}</h2>
+    </div>
+  );
+};
+
+/* ----------------------------------
+   Summary Row
+---------------------------------- */
+
+const SummaryRow = ({
+  label,
+  value,
+  valueClass = "text-gray-900",
+  bold = false,
+}) => {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span
+        className={bold ? "font-bold text-gray-900" : "text-sm text-gray-600"}
+      >
+        {label}
+      </span>
+
+      <span
+        className={`${
+          bold ? "text-xl font-bold" : "text-sm font-semibold"
+        } ${valueClass}`}
+      >
+        {value}
+      </span>
+    </div>
+  );
+};
+
+export default OrderSuccess;

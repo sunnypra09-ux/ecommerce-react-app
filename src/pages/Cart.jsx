@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useCart } from "../hooks/useCart";
 import { useNavigate } from "react-router-dom";
-import { CartItem, Summery } from "../components";
+import { CartItem, Summery, EmptyState } from "../components";
 import { useDispatch, useSelector } from "react-redux";
 import { selectTotalItems, selectTotalPrice } from "../features/cart/cartSlice";
 import { useUser } from "@clerk/react";
@@ -29,15 +29,12 @@ export const Cart = () => {
 
   if (myCart.length === 0) {
     return (
-      <div className="w-full min-h-screen text-center pt-10 text-xl">
-        <p>You cart is empty</p>
-        <button
-          onClick={() => navigate("/shop")}
-          className="text-sm text-white px-4 mt-2 py-1 bg-red-500 rounded-full cursor-pointer"
-        >
-          continue shopping
-        </button>
-      </div>
+      <EmptyState
+        title="Your cart is empty"
+        description="Looks like you haven't added anything to your cart yet."
+        buttonText="Continue Shopping"
+        onClick={() => navigate("/shop")}
+      />
     );
   }
 
